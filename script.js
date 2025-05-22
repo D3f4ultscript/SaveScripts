@@ -111,6 +111,7 @@ function generateHash() {
 
 // Funktion zum Hochladen eines Scripts
 function uploadScript() {
+    console.log('Upload function called'); // Debug log
     const content = document.getElementById('scriptContent').value.trim();
     
     if (!content) {
@@ -131,8 +132,13 @@ function uploadScript() {
     
     // Zeige die URL an
     const scriptLinkDiv = document.getElementById('scriptLink');
-    scriptLinkDiv.textContent = scriptUrl;
-    scriptLinkDiv.style.display = 'block';
+    if (scriptLinkDiv) {
+        scriptLinkDiv.textContent = scriptUrl;
+        scriptLinkDiv.style.display = 'block';
+        console.log('Link generated:', scriptUrl); // Debug log
+    } else {
+        console.error('scriptLink element not found'); // Debug log
+    }
 }
 
 // Funktion zum Kopieren des Links
