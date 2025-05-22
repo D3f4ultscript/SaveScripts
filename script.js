@@ -3,8 +3,27 @@ let scripts = [];
 let scriptNameInput, scriptContentInput, uploadBtn, scriptsListDiv;
 let mainPage, rawPage, rawContent;
 
-// Basis-URL für die Raw-Ansicht (ändern Sie dies zu Ihrer GitHub-URL)
-const baseUrl = 'https://raw.githubusercontent.com/YourUsername/YourRepo/main/scripts';
+// Basis-URL für die Raw-Ansicht
+const baseUrl = 'http://sunny-5n92.onrender.com/raw';
+
+// Funktion zum Generieren eines sicheren Hashes
+function generateSecureHash(content) {
+    // Simuliere einen komplexen Hash (in der Realität würden Sie eine kryptographische Funktion verwenden)
+    const timestamp = Date.now().toString();
+    const randomPart = Math.random().toString(36).substring(2);
+    const contentPart = content.length.toString(36);
+    
+    // Erstelle einen langen, zufälligen Hash
+    let hash = '';
+    const characters = 'abcdef0123456789';
+    const length = 128; // Länge des Hashes
+    
+    for (let i = 0; i < length; i++) {
+        hash += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    
+    return hash;
+}
 
 // Funktion zum Laden der Scripts aus dem localStorage
 function loadScripts() {
@@ -31,11 +50,8 @@ function loadScripts() {
 function showRawView(script) {
     mainPage.style.display = 'none';
     rawPage.style.display = 'block';
-    rawContent.textContent = script.content;
-    
-    // Aktualisiere die URL ohne die Seite neu zu laden
-    const rawUrl = `${baseUrl}/${script.id}.lua`;
-    window.history.pushState({ scriptId: script.id }, '', `/raw/${script.id}`);
+    rawContent.textContent = 'Access Denied';
+    window.history.pushState({ scriptId: script.id }, '', `/raw/${script.hash}`);
 }
 
 // Funktion zum Zurückkehren zur Hauptseite
@@ -122,15 +138,16 @@ function uploadScript() {
             return;
         }
 
-        // Erstelle eine einzigartige ID
-        const timestamp = Date.now();
-        const id = name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + timestamp;
+        // Generiere eine sichere Hash-ID
+        const hash = generateSecureHash(content);
+        const id = Date.now().toString();
         
         const script = {
             id: id,
+            hash: hash,
             name: name,
             content: content,
-            timestamp: timestamp
+            timestamp: Date.now()
         };
 
         scripts.push(script);
@@ -164,8 +181,8 @@ function copyScriptUrl(scriptId) {
             return;
         }
         
-        // Erstelle die GitHub-ähnliche Raw-URL
-        const rawUrl = `${baseUrl}/${script.id}.lua`;
+        // Erstelle die geschützte URL
+        const rawUrl = `${baseUrl}/${script.hash}`;
         
         navigator.clipboard.writeText(rawUrl)
             .then(() => {
