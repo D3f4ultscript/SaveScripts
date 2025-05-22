@@ -164,36 +164,36 @@ function copyScriptUrl(scriptId) {
             return;
         }
 
-        // Erstelle eine URL mit dem reinen Script-Inhalt
-        const rawUrl = `https://raw.githubusercontent.com/YourUsername/YourRepo/main/scripts/${script.id}.lua`;
+        // Erstelle die direkte Script-URL
+        const scriptUrl = `http://localhost:3000/script/${script.id}`;
         
-        // Zeige Dialog mit Anweisungen
-        const message = `Kopiere diesen Code für loadstring:\n\nloadstring(game:HttpGet("${rawUrl}"))()`; 
-        alert(message);
+        // Erstelle den loadstring-Code
+        const loadstringCode = `loadstring(game:HttpGet("${scriptUrl}"))()`;
 
-        // Kopiere den kompletten loadstring-Code
-        navigator.clipboard.writeText(`loadstring(game:HttpGet("${rawUrl}"))()`)
+        // Kopiere den Code in die Zwischenablage
+        navigator.clipboard.writeText(loadstringCode)
             .then(() => {
-                console.log('Loadstring-Code erfolgreich kopiert');
+                console.log('Loadstring-Code kopiert');
+                alert('Der loadstring-Code wurde in die Zwischenablage kopiert!\n\n' + loadstringCode);
             })
             .catch(err => {
                 console.error('Fehler beim Kopieren:', err);
-                alert('Fehler beim Kopieren des Codes.');
+                alert('Fehler beim Kopieren des Codes. Hier ist der Code zum manuellen Kopieren:\n\n' + loadstringCode);
             });
 
-        // Speichere den Script auch als separate Datei
-        const scriptContent = script.content;
-        const blob = new Blob([scriptContent], { type: 'text/plain' });
-        const downloadUrl = URL.createObjectURL(blob);
-        
-        // Erstelle einen Download-Link
-        const downloadLink = document.createElement('a');
-        downloadLink.href = downloadUrl;
-        downloadLink.download = `${script.id}.lua`;
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
-        URL.revokeObjectURL(downloadUrl);
+        // Sende den Script-Inhalt an den Server
+        fetch('http://localhost:3000/script', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id: script.id,
+                content: script.content
+            })
+        }).catch(error => {
+            console.error('Fehler beim Senden an Server:', error);
+        });
 
     } catch (error) {
         console.error('Fehler beim Erstellen/Kopieren der URL:', error);
