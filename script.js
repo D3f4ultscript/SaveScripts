@@ -103,7 +103,7 @@ function saveToLocalStorage(key, data) {
 function generateHash() {
     const characters = 'abcdef0123456789';
     let hash = '';
-    for (let i = 0; i < 64; i++) {
+    for (let i = 0; i < 128; i++) {
         hash += characters.charAt(Math.floor(Math.random() * characters.length));
     }
     return hash;
@@ -130,7 +130,9 @@ function uploadScript() {
     const scriptUrl = `${window.location.origin}/script/${hash}`;
     
     // Zeige die URL an
-    document.getElementById('scriptLink').textContent = scriptUrl;
+    const scriptLinkDiv = document.getElementById('scriptLink');
+    scriptLinkDiv.textContent = scriptUrl;
+    scriptLinkDiv.style.display = 'block';
 }
 
 // Funktion zum Kopieren der Script-URL
@@ -267,8 +269,8 @@ if (path.startsWith('/script/')) {
     const content = scripts[hash];
     
     if (content) {
-        // Zeige nur den Script-Inhalt an
-        document.body.innerHTML = `<pre style="white-space: pre-wrap; word-wrap: break-word; padding: 20px;">${content}</pre>`;
+        // Zeige NUR den Script-Inhalt ohne HTML-Formatierung
+        document.documentElement.innerHTML = content;
     } else {
         document.body.innerHTML = '<h1 style="text-align: center; padding: 20px;">Script nicht gefunden</h1>';
     }
