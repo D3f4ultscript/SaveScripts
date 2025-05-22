@@ -110,8 +110,7 @@ function generateHash() {
 }
 
 // Funktion zum Hochladen eines Scripts
-function uploadScript() {
-    console.log('Upload function called'); // Debug log
+async function uploadScript() {
     const content = document.getElementById('scriptContent').value.trim();
     
     if (!content) {
@@ -119,25 +118,32 @@ function uploadScript() {
         return;
     }
 
-    // Generiere einen zufälligen Hash für die URL
-    const hash = generateHash();
-    
-    // Speichere den Script im localStorage
-    const scripts = JSON.parse(localStorage.getItem('scripts') || '{}');
-    scripts[hash] = content;
-    localStorage.setItem('scripts', JSON.stringify(scripts));
-    
-    // Generiere die URL
-    const scriptUrl = `http://sunny-5n92.onrender.com/raw/${hash}`;
-    
-    // Zeige die URL an
-    const scriptLinkDiv = document.getElementById('scriptLink');
-    if (scriptLinkDiv) {
-        scriptLinkDiv.textContent = scriptUrl;
-        scriptLinkDiv.style.display = 'block';
-        console.log('Link generated:', scriptUrl); // Debug log
-    } else {
-        console.error('scriptLink element not found'); // Debug log
+    try {
+        // Sende den Script an den Server
+        const response = await fetch('http://sunny-5n92.onrender.com/upload', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content: content })
+        });
+
+        if (!response.ok) {
+            throw new Error('Upload failed');
+        }
+
+        // Hole die generierte URL vom Server
+        const data = await response.json();
+        
+        // Zeige die URL an
+        const scriptLinkDiv = document.getElementById('scriptLink');
+        if (scriptLinkDiv) {
+            scriptLinkDiv.textContent = data.url;
+            scriptLinkDiv.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Upload failed. Please try again.');
     }
 }
 
@@ -279,6 +285,8 @@ window.copyScriptUrl = copyScriptUrl;
 window.deleteScript = deleteScript;
 window.showRawView = showRawView;
 window.showMainView = showMainView;
+window.uploadScript = uploadScript;
+window.copyLink = copyLink;
 
 // Warte bis das DOM geladen ist
 if (document.readyState === 'loading') {
