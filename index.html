@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meine Script-Verwaltung</title>
+    <title>Script Manager</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="mainPage">
         <h1>Meine Script-Verwaltung</h1>
         
         <div class="upload-section">
@@ -25,6 +25,12 @@
             </div>
         </div>
     </div>
+
+    <!-- Raw View Page -->
+    <div class="container" id="rawPage" style="display: none;">
+        <pre id="rawContent" class="raw-content"></pre>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html> 

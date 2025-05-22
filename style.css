@@ -87,6 +87,11 @@ textarea.input-field {
 
 .script-name {
     font-weight: bold;
+    cursor: pointer;
+}
+
+.script-name:hover {
+    color: #3498db;
 }
 
 .script-actions {
@@ -108,4 +113,18 @@ textarea.input-field {
 
 .delete-btn:hover {
     background-color: #c0392b;
+}
+
+/* Raw View Styles */
+.raw-content {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 2rem;
+    border-radius: 8px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-x: auto;
 } 

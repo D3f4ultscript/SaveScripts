@@ -1,6 +1,10 @@
 // Globale Variablen
 let scripts = [];
 let scriptNameInput, scriptContentInput, uploadBtn, scriptsListDiv;
+let mainPage, rawPage, rawContent;
+
+// Basis-URL für die Raw-Ansicht (ändern Sie dies zu Ihrer GitHub-URL)
+const baseUrl = 'https://raw.githubusercontent.com/YourUsername/YourRepo/main/scripts';
 
 // Funktion zum Laden der Scripts aus dem localStorage
 function loadScripts() {
@@ -8,12 +12,10 @@ function loadScripts() {
         const savedScripts = localStorage.getItem('scripts');
         if (savedScripts) {
             const parsed = JSON.parse(savedScripts);
-            // Stelle sicher, dass es ein Array ist
             scripts = Array.isArray(parsed) ? parsed : [];
         } else {
             scripts = [];
         }
-        console.log('Scripts geladen:', scripts);
     } catch (error) {
         console.error('Fehler beim Laden der Scripts:', error);
         scripts = [];
@@ -25,6 +27,24 @@ function loadScripts() {
     }
 }
 
+// Funktion zum Anzeigen der Raw-Ansicht
+function showRawView(script) {
+    mainPage.style.display = 'none';
+    rawPage.style.display = 'block';
+    rawContent.textContent = script.content;
+    
+    // Aktualisiere die URL ohne die Seite neu zu laden
+    const rawUrl = `${baseUrl}/${script.id}.lua`;
+    window.history.pushState({ scriptId: script.id }, '', `/raw/${script.id}`);
+}
+
+// Funktion zum Zurückkehren zur Hauptseite
+function showMainView() {
+    mainPage.style.display = 'block';
+    rawPage.style.display = 'none';
+    window.history.pushState({}, '', '/');
+}
+
 // Funktion zum Anzeigen der Scripts
 function displayScripts() {
     if (!scriptsListDiv) {
@@ -33,7 +53,6 @@ function displayScripts() {
     }
     
     try {
-        // Stelle sicher, dass scripts ein Array ist
         if (!Array.isArray(scripts)) {
             console.error('scripts ist kein Array, setze zurück');
             scripts = [];
@@ -53,7 +72,7 @@ function displayScripts() {
             const safeScriptName = script.name.replace(/[<>]/g, '');
             
             scriptElement.innerHTML = `
-                <div class="script-name">${safeScriptName}</div>
+                <div class="script-name" onclick="showRawView(${JSON.stringify(script)})">${safeScriptName}</div>
                 <div class="script-actions">
                     <button class="btn copy-url-btn" onclick="copyScriptUrl('${script.id}')">Raw URL Kopieren</button>
                     <button class="btn delete-btn" onclick="deleteScript('${script.id}')">Löschen</button>
@@ -70,7 +89,6 @@ function displayScripts() {
 // Funktion zum sicheren Speichern im localStorage
 function saveToLocalStorage(key, data) {
     try {
-        // Stelle sicher, dass data ein Array ist, wenn es scripts sind
         if (key === 'scripts' && !Array.isArray(data)) {
             console.error('Versuch, nicht-Array in scripts zu speichern');
             return false;
@@ -85,15 +103,12 @@ function saveToLocalStorage(key, data) {
 
 // Funktion zum Hochladen eines Scripts
 function uploadScript() {
-    console.log('Upload-Funktion gestartet');
-    
     if (!scriptNameInput || !scriptContentInput) {
         console.error('Input-Elemente nicht gefunden');
         return;
     }
     
     try {
-        // Stelle sicher, dass scripts ein Array ist
         if (!Array.isArray(scripts)) {
             console.error('scripts ist kein Array, initialisiere neu');
             scripts = [];
@@ -102,41 +117,28 @@ function uploadScript() {
         const name = scriptNameInput.value.trim();
         const content = scriptContentInput.value.trim();
         
-        console.log('Script-Daten:', { nameLength: name.length, contentLength: content.length });
-        
         if (!name || !content) {
             alert('Bitte fülle beide Felder aus!');
             return;
         }
 
         // Erstelle eine einzigartige ID
-        const id = `script_${Date.now()}_${Math.random().toString(36).substr(2)}`;
+        const timestamp = Date.now();
+        const id = name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + timestamp;
         
-        // Erstelle das Script-Objekt
         const script = {
             id: id,
             name: name,
             content: content,
-            timestamp: Date.now()
+            timestamp: timestamp
         };
 
-        console.log('Neues Script-Objekt erstellt:', { id: script.id, name: script.name });
-
-        // Füge das Script zur Liste hinzu
         scripts.push(script);
-        console.log('Script zur Liste hinzugefügt, neue Länge:', scripts.length);
         
-        // Speichere in localStorage
         if (saveToLocalStorage('scripts', scripts)) {
-            console.log('Script erfolgreich gespeichert');
-            
-            // Leere die Eingabefelder
             scriptNameInput.value = '';
             scriptContentInput.value = '';
-
-            // Aktualisiere die Anzeige
             displayScripts();
-            
             alert('Script wurde erfolgreich gespeichert!');
         } else {
             throw new Error('Speichern im localStorage fehlgeschlagen');
@@ -149,8 +151,6 @@ function uploadScript() {
 
 // Funktion zum Kopieren der Script-URL
 function copyScriptUrl(scriptId) {
-    console.log('Versuche URL zu kopieren für Script:', scriptId);
-    
     try {
         if (!Array.isArray(scripts)) {
             console.error('scripts ist kein Array beim Kopieren');
@@ -163,38 +163,18 @@ function copyScriptUrl(scriptId) {
             alert('Script nicht gefunden!');
             return;
         }
-
-        // Erstelle die direkte Script-URL
-        const scriptUrl = `http://localhost:3000/script/${script.id}`;
         
-        // Erstelle den loadstring-Code
-        const loadstringCode = `loadstring(game:HttpGet("${scriptUrl}"))()`;
-
-        // Kopiere den Code in die Zwischenablage
-        navigator.clipboard.writeText(loadstringCode)
+        // Erstelle die GitHub-ähnliche Raw-URL
+        const rawUrl = `${baseUrl}/${script.id}.lua`;
+        
+        navigator.clipboard.writeText(rawUrl)
             .then(() => {
-                console.log('Loadstring-Code kopiert');
-                alert('Der loadstring-Code wurde in die Zwischenablage kopiert!\n\n' + loadstringCode);
+                alert('Raw URL wurde in die Zwischenablage kopiert!');
             })
             .catch(err => {
                 console.error('Fehler beim Kopieren:', err);
-                alert('Fehler beim Kopieren des Codes. Hier ist der Code zum manuellen Kopieren:\n\n' + loadstringCode);
+                alert('Fehler beim Kopieren der URL. URL: ' + rawUrl);
             });
-
-        // Sende den Script-Inhalt an den Server
-        fetch('http://localhost:3000/script', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                id: script.id,
-                content: script.content
-            })
-        }).catch(error => {
-            console.error('Fehler beim Senden an Server:', error);
-        });
-
     } catch (error) {
         console.error('Fehler beim Erstellen/Kopieren der URL:', error);
         alert('Fehler beim Kopieren der URL.');
@@ -203,8 +183,6 @@ function copyScriptUrl(scriptId) {
 
 // Funktion zum Löschen eines Scripts
 function deleteScript(scriptId) {
-    console.log('Versuche Script zu löschen:', scriptId);
-    
     try {
         if (!Array.isArray(scripts)) {
             console.error('scripts ist kein Array beim Löschen');
@@ -223,7 +201,6 @@ function deleteScript(scriptId) {
             }
             
             if (saveToLocalStorage('scripts', scripts)) {
-                console.log('Script erfolgreich gelöscht');
                 displayScripts();
             } else {
                 throw new Error('Fehler beim Speichern nach dem Löschen');
@@ -235,37 +212,43 @@ function deleteScript(scriptId) {
     }
 }
 
+// Event-Listener für Browser-Navigation
+window.addEventListener('popstate', () => {
+    if (rawPage.style.display === 'block') {
+        showMainView();
+    }
+});
+
 // Initialisierung
 function init() {
-    console.log('Initialisierung gestartet');
-    
     // DOM Elemente initialisieren
     scriptNameInput = document.getElementById('scriptName');
     scriptContentInput = document.getElementById('scriptContent');
     uploadBtn = document.getElementById('uploadBtn');
     scriptsListDiv = document.getElementById('scriptsList');
+    mainPage = document.getElementById('mainPage');
+    rawPage = document.getElementById('rawPage');
+    rawContent = document.getElementById('rawContent');
 
     // Überprüfe ob alle Elemente vorhanden sind
-    if (!scriptNameInput || !scriptContentInput || !uploadBtn || !scriptsListDiv) {
+    if (!scriptNameInput || !scriptContentInput || !uploadBtn || !scriptsListDiv || !mainPage || !rawPage || !rawContent) {
         console.error('Nicht alle erforderlichen Elemente wurden gefunden!');
         return;
     }
 
-    console.log('Alle DOM-Elemente gefunden');
-
     // Event Listener hinzufügen
     uploadBtn.addEventListener('click', uploadScript);
-    console.log('Event Listener hinzugefügt');
 
     // Scripts laden und anzeigen
     loadScripts();
     displayScripts();
-    console.log('Initialisierung abgeschlossen');
 }
 
 // Stelle sicher, dass die Funktionen global verfügbar sind
 window.copyScriptUrl = copyScriptUrl;
 window.deleteScript = deleteScript;
+window.showRawView = showRawView;
+window.showMainView = showMainView;
 
 // Warte bis das DOM geladen ist
 if (document.readyState === 'loading') {
