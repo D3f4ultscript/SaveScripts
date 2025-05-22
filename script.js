@@ -114,7 +114,7 @@ function uploadScript() {
     const content = document.getElementById('scriptContent').value.trim();
     
     if (!content) {
-        alert('Bitte gib einen Script ein!');
+        alert('Please paste a script first!');
         return;
     }
 
@@ -127,12 +127,32 @@ function uploadScript() {
     localStorage.setItem('scripts', JSON.stringify(scripts));
     
     // Generiere die URL
-    const scriptUrl = `${window.location.origin}/script/${hash}`;
+    const scriptUrl = `http://sunny-5n92.onrender.com/raw/${hash}`;
     
     // Zeige die URL an
     const scriptLinkDiv = document.getElementById('scriptLink');
     scriptLinkDiv.textContent = scriptUrl;
     scriptLinkDiv.style.display = 'block';
+}
+
+// Funktion zum Kopieren des Links
+function copyLink() {
+    const scriptLinkDiv = document.getElementById('scriptLink');
+    const text = scriptLinkDiv.textContent;
+    
+    if (!text) return;
+    
+    navigator.clipboard.writeText(text)
+        .then(() => {
+            const copyBtn = document.querySelector('.copy-btn');
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => {
+                copyBtn.textContent = 'Copy';
+            }, 2000);
+        })
+        .catch(err => {
+            console.error('Failed to copy:', err);
+        });
 }
 
 // Funktion zum Kopieren der Script-URL
