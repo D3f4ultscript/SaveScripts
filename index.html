@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meine Script-Verwaltung</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Meine Script-Verwaltung</h1>
+        
+        <div class="upload-section">
+            <div class="input-group">
+                <input type="text" id="scriptName" placeholder="Script Name" class="input-field">
+                <textarea id="scriptContent" placeholder="Füge deinen Script-Code hier ein..." class="input-field"></textarea>
+            </div>
+            <button id="uploadBtn" class="btn">Script Hochladen</button>
+        </div>
+
+        <div class="scripts-list">
+            <h2>Meine Scripts</h2>
+            <div id="scriptsList" class="scripts-container">
+                <!-- Scripts werden hier dynamisch eingefügt -->
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html> 
