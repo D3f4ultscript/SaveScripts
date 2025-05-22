@@ -1,5 +1,5 @@
 // Globale Variablen
-let scripts = [];
+let scripts = JSON.parse(localStorage.getItem('scripts')) || [];
 let scriptNameInput, scriptContentInput, uploadBtn, scriptsListDiv;
 let mainPage, rawPage, rawContent;
 
@@ -99,52 +99,42 @@ function saveToLocalStorage(key, data) {
     }
 }
 
+// Funktion zum Generieren einer zufälligen ID
+function generateId() {
+    return Math.random().toString(36).substring(2) + Date.now().toString(36);
+}
+
 // Funktion zum Hochladen eines Scripts
 function uploadScript() {
-    if (!scriptNameInput || !scriptContentInput) {
-        console.error('Input-Elemente nicht gefunden');
+    const content = document.getElementById('scriptContent').value.trim();
+    
+    if (!content) {
+        alert('Bitte gib einen Script ein!');
         return;
     }
+
+    // Erstelle ein neues Script-Objekt
+    const script = {
+        id: generateId(),
+        content: content,
+        timestamp: Date.now()
+    };
+
+    // Füge das Script zur Liste hinzu
+    scripts.push(script);
     
-    try {
-        if (!Array.isArray(scripts)) {
-            console.error('scripts ist kein Array, initialisiere neu');
-            scripts = [];
-        }
-
-        const name = scriptNameInput.value.trim();
-        const content = scriptContentInput.value.trim();
-        
-        if (!name || !content) {
-            alert('Bitte fülle beide Felder aus!');
-            return;
-        }
-
-        // Erstelle eine einzigartige ID basierend auf Name und Zeitstempel
-        const timestamp = Date.now();
-        const id = name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + timestamp;
-        
-        const script = {
-            id: id,
-            name: name,
-            content: content,
-            timestamp: timestamp
-        };
-
-        scripts.push(script);
-        
-        if (saveToLocalStorage('scripts', scripts)) {
-            scriptNameInput.value = '';
-            scriptContentInput.value = '';
-            displayScripts();
-            alert('Script wurde erfolgreich gespeichert!');
-        } else {
-            throw new Error('Speichern im localStorage fehlgeschlagen');
-        }
-    } catch (error) {
-        console.error('Fehler beim Upload-Prozess:', error);
-        alert('Fehler beim Hochladen des Scripts: ' + error.message);
-    }
+    // Speichere die Liste
+    localStorage.setItem('scripts', JSON.stringify(scripts));
+    
+    // Zeige den Link an
+    const scriptUrl = `${window.location.origin}/script/${script.id}`;
+    alert('Script wurde hochgeladen!\nDein Link:\n' + scriptUrl);
+    
+    // Leere das Textfeld
+    document.getElementById('scriptContent').value = '';
+    
+    // Aktualisiere die Liste
+    displayScripts();
 }
 
 // Funktion zum Kopieren der Script-URL
@@ -271,4 +261,16 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
     init();
+}
+
+// Prüfe, ob wir auf einer Script-Seite sind
+const path = window.location.pathname;
+if (path.startsWith('/script/')) {
+    const scriptId = path.split('/').pop();
+    const script = scripts.find(s => s.id === scriptId);
+    
+    if (script) {
+        // Zeige nur den Script-Inhalt an
+        document.body.innerHTML = `<pre style="white-space: pre-wrap; word-wrap: break-word; padding: 20px;">${script.content}</pre>`;
+    }
 } 

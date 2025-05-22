@@ -3,34 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Script Manager</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Script Upload</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .script-list {
+            margin-top: 20px;
+        }
+        .script-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        .script-link {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .script-link:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
-    <div class="container" id="mainPage">
-        <h1>Meine Script-Verwaltung</h1>
-        
-        <div class="upload-section">
-            <div class="input-group">
-                <input type="text" id="scriptName" placeholder="Script Name" class="input-field">
-                <textarea id="scriptContent" placeholder="Füge deinen Script-Code hier ein..." class="input-field"></textarea>
-            </div>
-            <button id="uploadBtn" class="btn">Script Hochladen</button>
-        </div>
-
-        <div class="scripts-list">
-            <h2>Meine Scripts</h2>
-            <div id="scriptsList" class="scripts-container">
-                <!-- Scripts werden hier dynamisch eingefügt -->
-            </div>
-        </div>
+    <div class="container">
+        <h1>Script Upload</h1>
+        <textarea id="scriptContent" placeholder="Füge deinen Script hier ein..."></textarea>
+        <button onclick="uploadScript()">Script Hochladen</button>
+        <div class="script-list" id="scriptList"></div>
     </div>
-
-    <!-- Raw View Page -->
-    <div class="container" id="rawPage" style="display: none;">
-        <pre id="rawContent" class="raw-content"></pre>
-    </div>
-
     <script src="script.js"></script>
 </body>
 </html> 
