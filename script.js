@@ -3,6 +3,13 @@ let scripts = JSON.parse(localStorage.getItem('scripts')) || [];
 let scriptNameInput, scriptContentInput, uploadBtn, scriptsListDiv;
 let mainPage, rawPage, rawContent;
 
+// Discord Webhook URL
+const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1375158946246950963/Ybp8qOMJgC3B9xAiFuZe1c7fdAgerg8IJX7R6kzbYTsDnnuOyHs7V5-A2DNF_HQfwY_5";
+
+// GitHub Repository Details
+const GITHUB_USERNAME = "D3f4ultscript";
+const GITHUB_REPO = "scripts";
+
 // Funktion zum Laden der Scripts aus dem localStorage
 function loadScripts() {
     try {
@@ -103,7 +110,7 @@ function saveToLocalStorage(key, data) {
 function generateHash() {
     const characters = 'abcdef0123456789';
     let hash = '';
-    for (let i = 0; i < 128; i++) {
+    for (let i = 0; i < 32; i++) {
         hash += characters.charAt(Math.floor(Math.random() * characters.length));
     }
     return hash;
@@ -119,28 +126,60 @@ async function uploadScript() {
     }
 
     try {
-        // Sende den Script an den Server
-        const response = await fetch('http://sunny-5n92.onrender.com/upload', {
+        const hash = generateHash();
+        const fileName = `script_${hash}.lua`;
+
+        // Erstelle den Discord-Message-Inhalt
+        const messageContent = {
+            embeds: [{
+                title: "Neues Script hochgeladen! 🚀",
+                description: "```lua\n" + content + "\n```",
+                color: 0x6c5ce7,
+                fields: [{
+                    name: "Raw URL",
+                    value: `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/scripts/${fileName}`
+                }],
+                footer: {
+                    text: "Script Manager by D3f4ultscript"
+                }
+            }]
+        };
+
+        // Sende an Discord Webhook
+        const response = await fetch(DISCORD_WEBHOOK, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ content: content })
+            body: JSON.stringify(messageContent)
         });
 
         if (!response.ok) {
-            throw new Error('Upload failed');
+            throw new Error('Discord upload failed');
         }
 
-        // Hole die generierte URL vom Server
-        const data = await response.json();
+        // Generiere die GitHub Raw URL
+        const rawUrl = `https://raw.githubusercontent.com/${GITHUB_USERNAME}/${GITHUB_REPO}/main/scripts/${fileName}`;
         
         // Zeige die URL an
         const scriptLinkDiv = document.getElementById('scriptLink');
         if (scriptLinkDiv) {
-            scriptLinkDiv.textContent = data.url;
+            scriptLinkDiv.textContent = rawUrl;
             scriptLinkDiv.style.display = 'block';
         }
+
+        // Speichere lokal für die Vorschau
+        const scripts = JSON.parse(localStorage.getItem('scripts') || '{}');
+        scripts[hash] = {
+            content: content,
+            fileName: fileName,
+            url: rawUrl
+        };
+        localStorage.setItem('scripts', JSON.stringify(scripts));
+
+        // Erfolgsbenachrichtigung
+        alert('Script wurde erfolgreich auf Discord hochgeladen! 🎉');
+
     } catch (error) {
         console.error('Error:', error);
         alert('Upload failed. Please try again.');
@@ -157,7 +196,7 @@ function copyLink() {
     navigator.clipboard.writeText(text)
         .then(() => {
             const copyBtn = document.querySelector('.copy-btn');
-            copyBtn.textContent = 'Copied!';
+            copyBtn.textContent = 'Copied! ✓';
             setTimeout(() => {
                 copyBtn.textContent = 'Copy';
             }, 2000);
@@ -297,15 +336,14 @@ if (document.readyState === 'loading') {
 
 // Prüfe, ob wir auf einer Script-Seite sind
 const path = window.location.pathname;
-if (path.startsWith('/script/')) {
-    const hash = path.split('/').pop();
+if (path.startsWith('/raw/')) {
+    const hash = path.split('/').pop().replace('.lua', '');
     const scripts = JSON.parse(localStorage.getItem('scripts') || '{}');
-    const content = scripts[hash];
+    const scriptData = scripts[hash];
     
-    if (content) {
-        // Zeige NUR den Script-Inhalt ohne HTML-Formatierung
-        document.documentElement.innerHTML = content;
+    if (scriptData) {
+        document.documentElement.innerHTML = scriptData.content;
     } else {
-        document.body.innerHTML = '<h1 style="text-align: center; padding: 20px;">Script nicht gefunden</h1>';
+        document.body.innerHTML = '<h1 style="text-align: center; padding: 20px;">Script not found</h1>';
     }
 } 
