@@ -99,9 +99,14 @@ function saveToLocalStorage(key, data) {
     }
 }
 
-// Funktion zum Generieren einer zufälligen ID
-function generateId() {
-    return Math.random().toString(36).substring(2) + Date.now().toString(36);
+// Funktion zum Generieren eines zufälligen Hashes
+function generateHash() {
+    const characters = 'abcdef0123456789';
+    let hash = '';
+    for (let i = 0; i < 64; i++) {
+        hash += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return hash;
 }
 
 // Funktion zum Hochladen eines Scripts
@@ -113,28 +118,19 @@ function uploadScript() {
         return;
     }
 
-    // Erstelle ein neues Script-Objekt
-    const script = {
-        id: generateId(),
-        content: content,
-        timestamp: Date.now()
-    };
-
-    // Füge das Script zur Liste hinzu
-    scripts.push(script);
+    // Generiere einen zufälligen Hash für die URL
+    const hash = generateHash();
     
-    // Speichere die Liste
+    // Speichere den Script im localStorage
+    const scripts = JSON.parse(localStorage.getItem('scripts') || '{}');
+    scripts[hash] = content;
     localStorage.setItem('scripts', JSON.stringify(scripts));
     
-    // Zeige den Link an
-    const scriptUrl = `${window.location.origin}/script/${script.id}`;
-    alert('Script wurde hochgeladen!\nDein Link:\n' + scriptUrl);
+    // Generiere die URL
+    const scriptUrl = `${window.location.origin}/script/${hash}`;
     
-    // Leere das Textfeld
-    document.getElementById('scriptContent').value = '';
-    
-    // Aktualisiere die Liste
-    displayScripts();
+    // Zeige die URL an
+    document.getElementById('scriptLink').textContent = scriptUrl;
 }
 
 // Funktion zum Kopieren der Script-URL
@@ -266,11 +262,14 @@ if (document.readyState === 'loading') {
 // Prüfe, ob wir auf einer Script-Seite sind
 const path = window.location.pathname;
 if (path.startsWith('/script/')) {
-    const scriptId = path.split('/').pop();
-    const script = scripts.find(s => s.id === scriptId);
+    const hash = path.split('/').pop();
+    const scripts = JSON.parse(localStorage.getItem('scripts') || '{}');
+    const content = scripts[hash];
     
-    if (script) {
+    if (content) {
         // Zeige nur den Script-Inhalt an
-        document.body.innerHTML = `<pre style="white-space: pre-wrap; word-wrap: break-word; padding: 20px;">${script.content}</pre>`;
+        document.body.innerHTML = `<pre style="white-space: pre-wrap; word-wrap: break-word; padding: 20px;">${content}</pre>`;
+    } else {
+        document.body.innerHTML = '<h1 style="text-align: center; padding: 20px;">Script nicht gefunden</h1>';
     }
 } 

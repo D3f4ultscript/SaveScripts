@@ -39,25 +39,17 @@
             padding: 10px 20px;
             border-radius: 4px;
             cursor: pointer;
+            margin-bottom: 20px;
         }
         button:hover {
             background: #2980b9;
         }
-        .script-list {
-            margin-top: 20px;
-        }
-        .script-item {
+        #scriptLink {
             padding: 10px;
+            background: #f8f9fa;
             border: 1px solid #ddd;
-            margin: 5px 0;
             border-radius: 4px;
-        }
-        .script-link {
-            color: #3498db;
-            text-decoration: none;
-        }
-        .script-link:hover {
-            text-decoration: underline;
+            word-break: break-all;
         }
     </style>
 </head>
@@ -65,8 +57,8 @@
     <div class="container">
         <h1>Script Upload</h1>
         <textarea id="scriptContent" placeholder="Füge deinen Script hier ein..."></textarea>
-        <button onclick="uploadScript()">Script Hochladen</button>
-        <div class="script-list" id="scriptList"></div>
+        <button onclick="uploadScript()">Link Generieren</button>
+        <div id="scriptLink"></div>
     </div>
     <script src="script.js"></script>
 </body>
